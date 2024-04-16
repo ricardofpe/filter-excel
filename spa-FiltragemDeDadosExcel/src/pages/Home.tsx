@@ -6,6 +6,8 @@ export default function Home() {
 
 
     const [data, setData] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+
 
     const handleFileUpload = (e) => {
       const reader = new FileReader();
@@ -15,10 +17,23 @@ export default function Home() {
         const workbook = XLSX.read(data, { type: "binary" });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
-        const parsedData = XLSX.utils.sheet_to_json(sheet);
+          const parsedData = XLSX.utils.sheet_to_json(sheet);
+          
         setData(parsedData);
-      };
+        };
+        
+
+
     }
+
+    
+    const filteredData = data.filter((row) =>
+        Object.values(row).some(
+          (value) =>
+            typeof value === "string" && value.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      );
+      
   
 
     return (
@@ -31,11 +46,19 @@ export default function Home() {
           accept=".xlsx, .xls" 
           onChange={handleFileUpload} 
         />
-  
+
+<input
+  type="text"
+  placeholder="Search..."
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+/>
+
+
                 <ContainerData>
 
                 
-        {data.length > 0 && (
+        {filteredData.length > 0 && (
           <table className="table">
             <thead>
               <tr>
@@ -45,7 +68,7 @@ export default function Home() {
               </tr>
             </thead>
             <tbody>
-              {data.map((row, index) => (
+              {filteredData.map((row, index) => (
                 <tr key={index}>
                   {Object.values(row).map((value, index) => (
                     <td key={index}>{value}</td>
