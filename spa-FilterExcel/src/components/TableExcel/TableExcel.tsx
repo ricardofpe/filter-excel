@@ -1,23 +1,27 @@
-import { useState } from "react";
-
+import React, { useState, ChangeEvent } from "react";
 import * as XLSX from "xlsx";
 import { ArrowDown } from "react-bootstrap-icons";
 import { ContainerData, InputFile, InputSearch } from "./TableExcelStyled";
-export default function TableExcel() {
-  const [searchTerm, setSearchTerm] = useState("");
 
-  const [data, setData] = useState([]);
+interface Row {
+  [key: string]: string | number;
+}
 
-  const handleFileUpload = (e) => {
+const TableExcel: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [data, setData] = useState<Row[]>([]);
+
+  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
     const reader = new FileReader();
     reader.readAsBinaryString(e.target.files[0]);
     reader.onload = (e) => {
-      const data = e.target.result;
+      if (!e.target?.result) return;
+      const data = e.target.result.toString();
       const workbook = XLSX.read(data, { type: "binary" });
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
-      const parsedData = XLSX.utils.sheet_to_json(sheet);
-
+      const parsedData = XLSX.utils.sheet_to_json(sheet) as Row[];
       setData(parsedData);
     };
   };
@@ -31,17 +35,26 @@ export default function TableExcel() {
   );
 
   return (
-      <>
-          <span>Coloque seu arquivo abaixo <ArrowDown size={15}/></span>
-      <InputFile type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
-
-     {filteredData.length == 0 ? (null) : (<InputSearch
-        type="text"
-        placeholder="Search..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />)} 
-<ContainerData style={{ display: "grid", gridTemplateColumns: `repeat(auto-fill, minmax(100px))` }}>
+    <>
+      <span>
+        Coloque seu arquivo abaixo <ArrowDown size={15} />
+      </span>
+      <InputFile
+        type="file"
+        accept=".xlsx, .xls"
+        onChange={handleFileUpload}
+      />
+      {filteredData.length === 0 ? null : (
+        <InputSearch
+          type="text"
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      )}
+      <ContainerData
+        style={{ display: "grid", gridTemplateColumns: `repeat(auto-fill, minmax(100px))` }}
+      >
         {filteredData.length > 0 && (
           <table className="table">
             <thead>
@@ -65,4 +78,6 @@ export default function TableExcel() {
       </ContainerData>
     </>
   );
-}
+};
+
+export default TableExcel;
