@@ -1,5 +1,5 @@
 {
-  "name": "ssp-filtragemdedadosexcel",
+  "name": "spa-filtragemdedadosexcel",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,7 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    
     "react": "^18.2.0",
+    "react-bootstrap-icons": "^1.11.4",
     "react-dom": "^18.2.0",
     "styled-components": "^6.1.8",
     "xlsx": "^0.18.5"

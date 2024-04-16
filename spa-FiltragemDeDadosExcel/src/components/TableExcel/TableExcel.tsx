@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { ContainerData, InputFile, InputSearch } from "./TableExcelStyled";
-import * as XLSX from "xlsx";
 
+import * as XLSX from "xlsx";
+import { ArrowDown } from "react-bootstrap-icons";
+import { ContainerData, InputFile, InputSearch } from "./TableExcelStyled";
 export default function TableExcel() {
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -30,7 +31,8 @@ export default function TableExcel() {
   );
 
   return (
-    <>
+      <>
+          <span>Coloque seu arquivo abaixo <ArrowDown size={15}/></span>
       <InputFile type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
 
      {filteredData.length == 0 ? (null) : (<InputSearch
@@ -39,7 +41,7 @@ export default function TableExcel() {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />)} 
-      <ContainerData>
+<ContainerData style={{ display: "grid", gridTemplateColumns: `repeat(auto-fill, minmax(100px))` }}>
         {filteredData.length > 0 && (
           <table className="table">
             <thead>

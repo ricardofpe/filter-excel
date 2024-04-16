@@ -4,7 +4,8 @@ export const ContainerData = styled.div`
 background-color: #c7ffc7;
 
 box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-
+margin: 20px;
+width: 90%;
 thead{
     background-color: #aaaaaa;
 
@@ -19,10 +20,14 @@ th{
 td{
     border: 0.1px solid black;
     padding: 10px;
+    max-width: 250px;
+
 }
 
 
+
 `
+
 
 export const InputFile = styled.input`
 margin: 10px;
@@ -34,5 +39,6 @@ padding: 8px 12px;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 14px;
-  width: 250px; /* Defina a largura conforme necessário */
+  width: 250px; 
+  margin-bottom: 20px;
 `
