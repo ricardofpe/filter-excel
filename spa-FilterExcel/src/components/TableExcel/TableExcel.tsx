@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent, useEffect } from "react";
 import * as XLSX from "xlsx";
 import { ArrowDown } from "react-bootstrap-icons";
 import { ContainerData, InputFile, InputSearch } from "./TableExcelStyled";
@@ -9,8 +9,31 @@ interface Row {
 
 const TableExcel: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [data, setData] = useState<Row[]>([]);
+  const [originalData, setOriginalData] = useState<Row[]>([]);
+  const [filteredData, setFilteredData] = useState<Row[]>([]);
   const [showSearch, setShowSearch] = useState<boolean>(false);
+  const [filterValues, setFilterValues] = useState<{ [key: string]: string[] }>({});
+  const [appliedFilters, setAppliedFilters] = useState<{ [key: string]: string }>({});
+
+  useEffect(() => {
+   
+    const values: { [key: string]: Set<string> } = {};
+    Object.keys(originalData[0] || {}).forEach((key) => {
+      values[key] = new Set(originalData.map((row) => row[key].toString()));
+    });
+    setFilterValues(values);
+  }, [originalData]);
+
+  useEffect(() => {
+
+    let filteredData = originalData;
+    Object.entries(appliedFilters).forEach(([columnName, value]) => {
+      if (value !== "") {
+        filteredData = filteredData.filter((row) => row[columnName].toString() === value);
+      }
+    });
+    setFilteredData(filteredData);
+  }, [originalData, appliedFilters]);
 
   const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -23,18 +46,36 @@ const TableExcel: React.FC = () => {
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
       const parsedData = XLSX.utils.sheet_to_json(sheet) as Row[];
-      setData(parsedData);
-      setShowSearch(true); // Mostrar campo de pesquisa após o upload do arquivo
+      setOriginalData(parsedData);
+      setShowSearch(true);
     };
   };
 
-  const filteredData = data.filter((row) =>
-    Object.values(row).some(
-      (value) =>
-        typeof value === "string" &&
-        value.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  const handleFilter = (columnName: string, value: string) => {
+    setAppliedFilters((prevFilters) => ({
+      ...prevFilters,
+      [columnName]: value,
+    }));
+  };
+
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    const filteredData = originalData.filter((row) =>
+      Object.values(row).some(
+        (value) =>
+          typeof value === "string" &&
+          value.toLowerCase().includes(value.toLowerCase())
+      )
+    );
+    setFilteredData(filteredData);
+  };
+
+  const handleClearFilter = (columnName: string) => {
+    setAppliedFilters((prevFilters) => ({
+      ...prevFilters,
+      [columnName]: "",
+    }));
+  };
 
   return (
     <>
@@ -47,12 +88,34 @@ const TableExcel: React.FC = () => {
         onChange={handleFileUpload}
       />
       {showSearch && (
-        <InputSearch
-          type="text"
-          placeholder="Search..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+        <>
+          <InputSearch
+            type="text"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => handleSearch(e.target.value)}
+          />
+          <div>
+            {Object.entries(filterValues).map(([columnName, values]) => (
+              <div key={columnName}>
+                <label htmlFor={columnName}>{columnName}</label>
+                <select
+                  id={columnName}
+                  value={appliedFilters[columnName]}
+                  onChange={(e) => handleFilter(columnName, e.target.value)}
+                >
+                  <option value="">All</option>
+                  {[...values].map((value) => (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+               
+              </div>
+            ))}
+          </div>
+        </>
       )}
       <ContainerData
         style={{ display: "grid", gridTemplateColumns: `repeat(auto-fill, minmax(100px))` }}
@@ -61,7 +124,7 @@ const TableExcel: React.FC = () => {
           <table className="table">
             <thead>
               <tr>
-                {Object.keys(data[0]).map((key) => (
+                {Object.keys(filteredData[0]).map((key) => (
                   <th key={key}>{key}</th>
                 ))}
               </tr>
