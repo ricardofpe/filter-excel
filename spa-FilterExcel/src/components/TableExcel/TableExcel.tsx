@@ -60,15 +60,13 @@ const TableExcel: React.FC = () => {
     setSearchTerm(value);
     const filteredData = originalData.filter((row) =>
       Object.values(row).some(
-        (value) =>
-          typeof value === "string" &&
-          value.toLowerCase().includes(value.toLowerCase())
+        (val) =>
+          typeof val === "string" &&
+          val.toLowerCase().includes(value.toLowerCase())
       )
     );
     setFilteredData(filteredData);
   };
-
-
 
   return (
     <>
@@ -104,7 +102,6 @@ const TableExcel: React.FC = () => {
                     </option>
                   ))}
                 </select>
-            
               </div>
             ))}
           </div>
