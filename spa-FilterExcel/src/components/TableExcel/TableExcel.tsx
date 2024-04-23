@@ -16,16 +16,14 @@ const TableExcel: React.FC = () => {
   const [appliedFilters, setAppliedFilters] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
-   
-    const values: { [key: string]: Set<string> } = {};
+    const values: { [key: string]: string[] } = {};
     Object.keys(originalData[0] || {}).forEach((key) => {
-      values[key] = new Set(originalData.map((row) => row[key].toString()));
+      values[key] = Array.from(new Set(originalData.map((row) => row[key].toString())));
     });
     setFilterValues(values);
   }, [originalData]);
 
   useEffect(() => {
-
     let filteredData = originalData;
     Object.entries(appliedFilters).forEach(([columnName, value]) => {
       if (value !== "") {
@@ -70,12 +68,7 @@ const TableExcel: React.FC = () => {
     setFilteredData(filteredData);
   };
 
-  const handleClearFilter = (columnName: string) => {
-    setAppliedFilters((prevFilters) => ({
-      ...prevFilters,
-      [columnName]: "",
-    }));
-  };
+
 
   return (
     <>
@@ -105,13 +98,13 @@ const TableExcel: React.FC = () => {
                   onChange={(e) => handleFilter(columnName, e.target.value)}
                 >
                   <option value="">All</option>
-                  {[...values].map((value) => (
+                  {values.map((value) => (
                     <option key={value} value={value}>
                       {value}
                     </option>
                   ))}
                 </select>
-               
+            
               </div>
             ))}
           </div>
