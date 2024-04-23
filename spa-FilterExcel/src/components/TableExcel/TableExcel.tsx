@@ -10,6 +10,7 @@ interface Row {
 const TableExcel: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [data, setData] = useState<Row[]>([]);
+  const [showSearch, setShowSearch] = useState<boolean>(false);
 
   const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -23,6 +24,7 @@ const TableExcel: React.FC = () => {
       const sheet = workbook.Sheets[sheetName];
       const parsedData = XLSX.utils.sheet_to_json(sheet) as Row[];
       setData(parsedData);
+      setShowSearch(true); // Mostrar campo de pesquisa após o upload do arquivo
     };
   };
 
@@ -44,7 +46,7 @@ const TableExcel: React.FC = () => {
         accept=".xlsx, .xls"
         onChange={handleFileUpload}
       />
-      {filteredData.length === 0 ? null : (
+      {showSearch && (
         <InputSearch
           type="text"
           placeholder="Search..."
