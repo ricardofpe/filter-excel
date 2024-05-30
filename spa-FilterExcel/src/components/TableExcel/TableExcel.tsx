@@ -2,16 +2,15 @@ import React, { useState, ChangeEvent, useEffect } from "react";
 import * as XLSX from "xlsx";
 import { ArrowDown } from "react-bootstrap-icons";
 import { FaDownload } from "react-icons/fa";
+import {FaDeleteLeft} from "react-icons/fa6"
 import {
   ContainerData,
   InputFile,
   InputSearch,
   ButtonDownload,
   FilterSection,
-  AutoFilterButtons,
   ButtonRemove,
 } from "./TableExcelStyled";
-import { FaDeleteLeft } from "react-icons/fa6";
 
 interface Row {
   [key: string]: string | number;
@@ -109,89 +108,6 @@ const TableExcel: React.FC = () => {
     XLSX.writeFile(workbook, "filtered_data.xlsx");
   };
 
-  const handleAutoFilter = (condition: string) => {
-    let filteredData = originalData;
-
-    const analyzeColumn = (columnName: string) => {
-      const columnValues = originalData.map((row) => row[columnName]);
-      const numericValues = columnValues.filter(
-        (value) => typeof value === "number"
-      ) as number[];
-      const stringValues = columnValues.filter(
-        (value) => typeof value === "string"
-      ) as string[];
-
-      if (numericValues.length > 0) {
-        const mean =
-          numericValues.reduce((acc, val) => acc + val, 0) /
-          numericValues.length;
-        const stdDev = Math.sqrt(
-          numericValues.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) /
-            numericValues.length
-        );
-        return {
-          outliers: (value: number) => Math.abs(value - mean) > 2 * stdDev,
-          lessThanMean: (value: number) => value < mean,
-        };
-      } else if (stringValues.length > 0) {
-        const freqMap: { [key: string]: number } = {};
-        stringValues.forEach((value) => {
-          if (!freqMap[value]) freqMap[value] = 0;
-          freqMap[value]++;
-        });
-        const mostFrequent = Object.keys(freqMap).reduce((a, b) =>
-          freqMap[a] > freqMap[b] ? a : b
-        );
-        return {
-          containsMostFrequent: (value: string) => value.includes(mostFrequent),
-          isNull: (value: string) => value === "",
-        };
-      }
-    };
-
-    Object.keys(originalData[0]).forEach((columnName) => {
-      const filters = analyzeColumn(columnName);
-      switch (condition) {
-        case "outliers":
-          if (filters?.outliers) {
-            filteredData = filteredData.filter((row) => {
-              const value = Number(row[columnName]);
-              return filters.outliers(value);
-            });
-          }
-          break;
-        case "lessThanMean":
-          if (filters?.lessThanMean) {
-            filteredData = filteredData.filter((row) => {
-              const value = Number(row[columnName]);
-              return filters.lessThanMean(value);
-            });
-          }
-          break;
-        case "containsMostFrequent":
-          if (filters?.containsMostFrequent) {
-            filteredData = filteredData.filter((row) => {
-              const value = row[columnName].toString();
-              return filters.containsMostFrequent(value);
-            });
-          }
-          break;
-        case "isNull":
-          if (filters?.isNull) {
-            filteredData = filteredData.filter((row) => {
-              const value = row[columnName].toString();
-              return filters.isNull(value);
-            });
-          }
-          break;
-        default:
-          break;
-      }
-    });
-
-    setFilteredData(filteredData);
-  };
-
   const handleRemoveData = () => {
     localStorage.removeItem(LOCAL_STORAGE_KEY);
     setOriginalData([]);
@@ -232,20 +148,6 @@ const TableExcel: React.FC = () => {
               </div>
             ))}
           </FilterSection>
-          <AutoFilterButtons>
-            <button onClick={() => handleAutoFilter("outliers")}>
-              Filter Outliers
-            </button>
-            <button onClick={() => handleAutoFilter("lessThanMean")}>
-              Values Less Than Mean
-            </button>
-            <button onClick={() => handleAutoFilter("containsMostFrequent")}>
-              Contains Most Frequent Value
-            </button>
-            <button onClick={() => handleAutoFilter("isNull")}>
-              Null/Empty Values
-            </button>
-          </AutoFilterButtons>
           <ButtonDownload onClick={handleDownload}>
             <FaDownload />
             Download Filtered Data
