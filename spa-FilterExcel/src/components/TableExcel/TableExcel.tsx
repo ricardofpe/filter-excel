@@ -12,6 +12,7 @@ import {
   ButtonRemove,
 } from "./TableExcelStyled";
 import { FaDeleteLeft } from "react-icons/fa6";
+
 interface Row {
   [key: string]: string | number;
 }
@@ -148,48 +149,45 @@ const TableExcel: React.FC = () => {
       }
     };
 
-    const filters = analyzeColumn(Object.keys(originalData[0])[0]);
-
-    switch (condition) {
-      case "outliers":
-        filteredData = filteredData.filter((row) => {
-          const key = Object.keys(row)[0];
-          if (key) {
-            return filters.outliers(Number(row[key]));
+    Object.keys(originalData[0]).forEach((columnName) => {
+      const filters = analyzeColumn(columnName);
+      switch (condition) {
+        case "outliers":
+          if (filters?.outliers) {
+            filteredData = filteredData.filter((row) => {
+              const value = Number(row[columnName]);
+              return filters.outliers(value);
+            });
           }
-          return false;
-        });
-        break;
-      case "lessThanMean":
-        filteredData = filteredData.filter((row) => {
-          const key = Object.keys(row)[0];
-          if (key) {
-            return filters.lessThanMean(Number(row[key]));
+          break;
+        case "lessThanMean":
+          if (filters?.lessThanMean) {
+            filteredData = filteredData.filter((row) => {
+              const value = Number(row[columnName]);
+              return filters.lessThanMean(value);
+            });
           }
-          return false;
-        });
-        break;
-      case "containsMostFrequent":
-        filteredData = filteredData.filter((row) => {
-          const key = Object.keys(row)[1];
-          if (key) {
-            return filters.containsMostFrequent(row[key].toString());
+          break;
+        case "containsMostFrequent":
+          if (filters?.containsMostFrequent) {
+            filteredData = filteredData.filter((row) => {
+              const value = row[columnName].toString();
+              return filters.containsMostFrequent(value);
+            });
           }
-          return false;
-        });
-        break;
-      case "isNull":
-        filteredData = filteredData.filter((row) => {
-          const key = Object.keys(row)[1];
-          if (key) {
-            return filters.isNull(row[key].toString());
+          break;
+        case "isNull":
+          if (filters?.isNull) {
+            filteredData = filteredData.filter((row) => {
+              const value = row[columnName].toString();
+              return filters.isNull(value);
+            });
           }
-          return false;
-        });
-        break;
-      default:
-        break;
-    }
+          break;
+        default:
+          break;
+      }
+    });
 
     setFilteredData(filteredData);
   };
