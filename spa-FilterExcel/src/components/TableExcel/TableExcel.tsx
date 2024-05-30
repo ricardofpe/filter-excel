@@ -2,7 +2,7 @@ import React, { useState, ChangeEvent, useEffect } from "react";
 import * as XLSX from "xlsx";
 import { ArrowDown } from "react-bootstrap-icons";
 import { FaDownload } from "react-icons/fa";
-import {FaDeleteLeft} from "react-icons/fa6"
+import { FaDeleteLeft } from "react-icons/fa6";
 import {
   ContainerData,
   InputFile,
@@ -10,6 +10,7 @@ import {
   ButtonDownload,
   FilterSection,
   ButtonRemove,
+  Counter,
 } from "./TableExcelStyled";
 
 interface Row {
@@ -29,6 +30,7 @@ const TableExcel: React.FC = () => {
   const [appliedFilters, setAppliedFilters] = useState<{
     [key: string]: string;
   }>({});
+  const [counters, setCounters] = useState<{ [key: string]: number }>({});
 
   useEffect(() => {
     const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -63,6 +65,21 @@ const TableExcel: React.FC = () => {
     });
     setFilteredData(filteredData);
   }, [originalData, appliedFilters]);
+
+  useEffect(() => {
+
+    const newCounters: { [key: string]: number } = {};
+    filteredData.forEach((row) => {
+      Object.entries(row).forEach(([columnName]) => {
+        if (!newCounters[columnName]) {
+          newCounters[columnName] = 1;
+        } else {
+          newCounters[columnName]++;
+        }
+      });
+    });
+    setCounters(newCounters);
+  }, [filteredData]);
 
   const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -145,6 +162,11 @@ const TableExcel: React.FC = () => {
                     </option>
                   ))}
                 </select>
+                {counters[columnName] && (
+                  <Counter>
+                    {counters[columnName]} <span>items</span>
+                  </Counter>
+                )}
               </div>
             ))}
           </FilterSection>

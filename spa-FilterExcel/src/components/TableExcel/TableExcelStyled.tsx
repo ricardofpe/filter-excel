@@ -1,3 +1,4 @@
+
 import styled, { keyframes } from "styled-components";
 
 const appear = keyframes`
@@ -5,6 +6,7 @@ const appear = keyframes`
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -117,33 +119,14 @@ export const FilterSection = styled.div`
   }
 `;
 
-export const AutoFilterButtons = styled.div`
-  margin: 20px 0;
+export const Counter = styled.div`
   display: flex;
-  gap: 10px;
-  animation: ${appear} 0.5s ease forwards;
+  align-items: center;
+  font-size: 14px;
 
-  button {
-    padding: 12px 16px;
-    border: none;
-    border-radius: 4px;
-    background-color: #28a745;
-    color: white;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s;
-
-    &:hover {
-      background-color: #218838;
-    }
-
-    &:active {
-      background-color: #1e7e34;
-    }
-
-    &:focus {
-      outline: none;
-    }
+  span {
+    margin-left: 5px;
+    color: #555;
   }
 `;
 
