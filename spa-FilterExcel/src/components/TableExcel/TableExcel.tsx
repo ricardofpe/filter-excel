@@ -47,7 +47,11 @@ const TableExcel: React.FC = () => {
       const values: { [key: string]: string[] } = {};
       Object.keys(originalData[0] || {}).forEach((key) => {
         values[key] = Array.from(
-          new Set(originalData.map((row) => row[key].toString()))
+          new Set(
+            originalData.map((row) => 
+              row[key] !== undefined && row[key] !== null ? row[key].toString() : ""
+            )
+          )
         );
       });
       setFilterValues(values);
