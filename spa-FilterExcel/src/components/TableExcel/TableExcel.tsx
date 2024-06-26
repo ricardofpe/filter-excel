@@ -47,7 +47,7 @@ const TableExcel: React.FC = () => {
       const values: { [key: string]: string[] } = {};
       Object.keys(originalData[0] || {}).forEach((key) => {
         values[key] = Array.from(
-          new Set(originalData.map((row) => row[key].toString()))
+          new Set(originalData.map((row) => row[key]))
         );
       });
       setFilterValues(values);
@@ -59,7 +59,7 @@ const TableExcel: React.FC = () => {
     Object.entries(appliedFilters).forEach(([columnName, value]) => {
       if (value !== "") {
         filteredData = filteredData.filter(
-          (row) => row[columnName].toString() === value
+          (row) => row[columnName] === value
         );
       }
     });
@@ -87,7 +87,7 @@ const TableExcel: React.FC = () => {
     reader.readAsBinaryString(e.target.files[0]);
     reader.onload = (e) => {
       if (!e.target?.result) return;
-      const data = e.target.result.toString();
+      const data = e.target.result;
       const workbook = XLSX.read(data, { type: "binary" });
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
