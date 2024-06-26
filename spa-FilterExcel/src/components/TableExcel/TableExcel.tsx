@@ -47,7 +47,7 @@ const TableExcel: React.FC = () => {
       const values: { [key: string]: string[] } = {};
       Object.keys(originalData[0] || {}).forEach((key) => {
         values[key] = Array.from(
-          new Set(originalData.map((row) => row[key]))
+          new Set(originalData.map((row) => row[key].toString()))
         );
       });
       setFilterValues(values);
@@ -67,7 +67,6 @@ const TableExcel: React.FC = () => {
   }, [originalData, appliedFilters]);
 
   useEffect(() => {
-
     const newCounters: { [key: string]: number } = {};
     filteredData.forEach((row) => {
       Object.entries(row).forEach(([columnName]) => {
