@@ -48,7 +48,7 @@ const TableExcel: React.FC = () => {
       Object.keys(originalData[0] || {}).forEach((key) => {
         values[key] = Array.from(
           new Set(
-            originalData.map((row) => 
+            originalData.map((row) =>
               row[key] !== undefined && row[key] !== null ? row[key].toString() : ""
             )
           )
@@ -86,20 +86,36 @@ const TableExcel: React.FC = () => {
 
   const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
+    const file = e.target.files[0];
     const reader = new FileReader();
-    reader.readAsBinaryString(e.target.files[0]);
     reader.onload = (e) => {
       if (!e.target?.result) return;
       const data = e.target.result;
-      const workbook = XLSX.read(data, { type: "binary" });
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
-      const parsedData = XLSX.utils.sheet_to_json(sheet) as Row[];
+
+      let parsedData: Row[] = [];
+      if (file.type === "text/csv") {
+        const workbook = XLSX.read(data, { type: "string" });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        parsedData = XLSX.utils.sheet_to_json(sheet) as Row[];
+      } else {
+        const workbook = XLSX.read(data, { type: "binary" });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        parsedData = XLSX.utils.sheet_to_json(sheet) as Row[];
+      }
+
       setOriginalData(parsedData);
       setFilteredData(parsedData);
       setShowSearch(true);
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(parsedData));
     };
+
+    if (file.type === "text/csv") {
+      reader.readAsText(file);
+    } else {
+      reader.readAsBinaryString(file);
+    }
   };
 
   const handleFilter = (columnName: string, value: string) => {
@@ -140,7 +156,7 @@ const TableExcel: React.FC = () => {
       <span>
         Upload your file below <ArrowDown size={15} />
       </span>
-      <InputFile type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
+      <InputFile type="file" accept=".xlsx, .xls, .csv" onChange={handleFileUpload} />
       {showSearch && (
         <>
           <InputSearch
